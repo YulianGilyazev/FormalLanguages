@@ -18,7 +18,7 @@ def fnd_mx(s, u):
                     dp_in[i][i] = True
             st.append([0, dp, dp_suf, dp_pref, dp_in])
 
-        if cur_symb == '*':
+        if cur_symb == '*' or cur_symb == '∗':
             arg = st[-1]
             cnt = len(u) + 10
             while cnt > 0:
@@ -105,8 +105,7 @@ def fnd_mx(s, u):
 
 
 def main():
-    inp = input()
-    s, u = inp.split()
+    s, u = input().split()
     print(fnd_mx(s, u))
 
 
