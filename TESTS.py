@@ -19,6 +19,9 @@ class TestUM(unittest.TestCase):
         self.assertEqual(2, fnd_mx("ab*.", "bab"))
         self.assertEqual(11, fnd_mx("a*b*.", "bbbbbaaaaabbbbbbaaaabbbb"))
         self.assertEqual(1, fnd_mx("ab.", "bbbbb"))
+        self.assertEqual(9, fnd_mx("ab*.1+*a*b.1+*+", "abbbababa"))
+        self.assertEqual(5, fnd_mx("ab*a.+1ab.+.", "bbaab"))
+        self.assertEqual(6, fnd_mx("ab.a.1+b*a.b+.1ab*.a.++a*b.1+.", "abbabababba"))
 
 
 if __name__ == '__main__':

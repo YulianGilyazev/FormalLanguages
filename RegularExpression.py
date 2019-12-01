@@ -17,7 +17,18 @@ def fnd_mx(s, u):
                     dp_pref[i][i] = True
                     dp_in[i][i] = True
             st.append([0, dp, dp_suf, dp_pref, dp_in])
-
+        if cur_symb == '1':
+            dp = np.zeros([len(u), len(u)])
+            dp_suf = np.zeros([len(u), len(u)])
+            dp_pref = np.zeros([len(u), len(u)])
+            dp_in = np.zeros([len(u), len(u)])
+            for i in range(len(u)):
+                if u[i] == cur_symb:
+                    dp[i][i] = True
+                    dp_suf[i][i] = True
+                    dp_pref[i][i] = True
+                    dp_in[i][i] = True
+            st.append([1, dp, dp_suf, dp_pref, dp_in])
         if cur_symb == '*' or cur_symb == '∗':
             arg = st[-1]
             cnt = len(u) + 10
