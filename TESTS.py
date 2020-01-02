@@ -22,7 +22,12 @@ class TestUM(unittest.TestCase):
         self.assertEqual(9, fnd_mx("ab*.1+*a*b.1+*+", "abbbababa"))
         self.assertEqual(5, fnd_mx("ab*a.+1ab.+.", "bbaab"))
         self.assertEqual(6, fnd_mx("ab.a.1+b*a.b+.1ab*.a.++a*b.1+.", "abbabababba"))
-
+        self.assertEqual(0, fnd_mx("1", "1"))
+        self.assertEqual(0, fnd_mx("ab.a.1+b*a.b+.1ab*.a.++a*b.1+.", "1"))
+        self.assertEqual(10, fnd_mx("ab.ca.+*ab.c.+ac.ba.c.+*ac.*.ca.+.",  "bbaabcabacbaaa"))
+        self.assertEqual(11, fnd_mx("ab.ca.+*ab.c.+ac.ba.c.+*ac.*.ca.+.", "ccacbacacacbb"))
+        self.assertEqual(1, fnd_mx("1a.c.*", "ccc"))
+        self.assertEqual(0, fnd_mx("ab.c+1+", "1"))
 
 if __name__ == '__main__':
     unittest.main()
