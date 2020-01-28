@@ -1,136 +1,158 @@
 import string
 import numpy as np
 
-def concatenate(st, u):
-    if len(st) < 2:
+
+class DpArrays:
+    is_substring = []
+    is_suf = []
+    is_pref = []
+    is_inside = []
+    has_empty_string = bool
+
+    def __init__(self, arrays_size):
+        self.is_substring = np.zeros((arrays_size, arrays_size))
+        self.is_suff = np.zeros((arrays_size, arrays_size))
+        self.is_pref = np.zeros((arrays_size, arrays_size))
+        self.is_inside = np.zeros((arrays_size, arrays_size))
+        self.has_empty_string = 0
+
+
+def concatenate(stack, u):
+    if len(stack) < 2:
         raise Exception("IncorrectRegularExpression")
-    left_arg = st[-2]
-    right_arg = st[-1]
-    ans = np.zeros((len(u), len(u)))
-    ans_suf = np.zeros((len(u), len(u)))
-    ans_pref = np.zeros((len(u), len(u)))
-    ans_in = np.zeros((len(u), len(u)))
+    left_arg = stack[-2]
+    right_arg = stack[-1]
+    front_stack_mem = DpArrays(len(u))
     for i in range(len(u)):
         for j in range(i, len(u)):
-            if left_arg[0] and right_arg[1][i][j]:
-                ans[i][j] = True
-            if right_arg[0] and left_arg[1][i][j]:
-                ans[i][j] = True
-            if left_arg[3][i][j]:
-                ans_pref[i][j] = True
-            if right_arg[3][i][j] and left_arg[0]:
-                ans_pref[i][j] = True
-            if right_arg[2][i][j]:
-                ans_suf[i][j] = True
-            if left_arg[2][i][j] and right_arg[0]:
-                ans_suf[i][j] = True
-            if right_arg[4][i][j]:
-                ans_in[i][j] = True
-            if left_arg[4][i][j]:
-                ans_in[i][j] = True
+            if left_arg.has_empty_string and right_arg.is_substring[i][j]:
+                front_stack_mem.is_substring[i][j] = True
+            if right_arg.has_empty_string and left_arg.is_substring[i][j]:
+                front_stack_mem.is_substring[i][j] = True
+            if left_arg.is_pref[i][j]:
+                front_stack_mem.is_pref[i][j] = True
+            if right_arg.is_pref[i][j] and left_arg.has_empty_string:
+                front_stack_mem.is_pref[i][j] = True
+            if right_arg.is_suff[i][j]:
+                front_stack_mem.is_suff[i][j] = True
+            if left_arg.is_suff[i][j] and right_arg.has_empty_string:
+                front_stack_mem.is_suff[i][j] = True
+            if right_arg.is_inside[i][j]:
+                front_stack_mem.is_inside[i][j] = True
+            if left_arg.is_inside[i][j]:
+                front_stack_mem.is_inside[i][j] = True
             for k in range(i, j):
-                if (left_arg[1][i][k] and right_arg[1][k + 1][j]):
-                    ans[i][j] = True
-                if (left_arg[1][i][k] and right_arg[3][k + 1][j]):
-                    ans_pref[i][j] = True
-                if (left_arg[2][i][k] and right_arg[1][k + 1][j]):
-                    ans_suf[i][j] = True
-                if (left_arg[2][i][k] and right_arg[3][k + 1][j]):
-                    ans_in[i][j] = True
-    st.pop(-1)
-    st.pop(-1)
-    st.append([(left_arg[0] and right_arg[0]), ans, ans_suf, ans_pref, ans_in,])
+                if left_arg.is_substring[i][k] and right_arg.is_substring[k + 1][j]:
+                    front_stack_mem.is_substring[i][j] = True
+                if left_arg.is_substring[i][k] and right_arg.is_pref[k + 1][j]:
+                    front_stack_mem.is_pref[i][j] = True
+                if left_arg.is_suff[i][k] and right_arg.is_substring[k + 1][j]:
+                    front_stack_mem.is_suff[i][j] = True
+                if left_arg.is_suff[i][k] and right_arg.is_pref[k + 1][j]:
+                    front_stack_mem.is_inside[i][j] = True
+    stack.pop(-1)
+    stack.pop(-1)
+    front_stack_mem.has_empty_string = (
+        left_arg.has_empty_string and right_arg.has_empty_string
+    )
+    stack.append(front_stack_mem)
 
 
-def unite(st, u):
-    if len(st) < 2:
+def unite(stack, u):
+    if len(stack) < 2:
         raise Exception("IncorrectRegularExpression")
-    left_arg = st[-2]
-    right_arg = st[-1]
+    left_arg = stack[-2]
+    right_arg = stack[-1]
     for i in range(len(u)):
         for j in range(len(u)):
-            left_arg[1][i][j] = max([left_arg[1][i][j], right_arg[1][i][j]])
-            left_arg[2][i][j] = max([left_arg[2][i][j], right_arg[2][i][j]])
-            left_arg[3][i][j] = max([left_arg[3][i][j], right_arg[3][i][j]])
-            left_arg[4][i][j] = max([left_arg[4][i][j], right_arg[4][i][j]])
-    st.pop(-1)
-    st.pop(-1)
-    left_arg[0] = max([left_arg[0], right_arg[0]])
-    st.append(left_arg)
+            left_arg.is_substring[i][j] = max(
+                [left_arg.is_substring[i][j], right_arg.is_substring[i][j]]
+            )
+            left_arg.is_suff[i][j] = max(
+                [left_arg.is_suff[i][j], right_arg.is_suff[i][j]]
+            )
+            left_arg.is_pref[i][j] = max(
+                [left_arg.is_pref[i][j], right_arg.is_pref[i][j]]
+            )
+            left_arg.is_inside[i][j] = max(
+                [left_arg.is_inside[i][j], right_arg.is_inside[i][j]]
+            )
+    stack.pop(-1)
+    stack.pop(-1)
+    left_arg.has_empty_string = max(
+        [left_arg.has_empty_string, right_arg.has_empty_string]
+    )
+    stack.append(left_arg)
 
 
-def add_empty_string_re(st, u):
-    dp = np.zeros([len(u), len(u)])
-    dp_suf = np.zeros([len(u), len(u)])
-    dp_pref = np.zeros([len(u), len(u)])
-    dp_in = np.zeros([len(u), len(u)])
-    st.append([1, dp, dp_suf, dp_pref, dp_in])
+def add_empty_string_re(stack, u):
+    front_stack_mem = DpArrays(len(u))
+    front_stack_mem.has_empty_string = 1
+    stack.append(front_stack_mem)
 
 
-def add_one_symbol_re(st, u, cur_symb):
-    dp = np.zeros([len(u), len(u)])
-    dp_suf = np.zeros([len(u), len(u)])
-    dp_pref = np.zeros([len(u), len(u)])
-    dp_in = np.zeros([len(u), len(u)])
+def add_one_symbol_re(stack, u, cur_symb):
+    front_stack_mem = DpArrays(len(u))
     for i in range(len(u)):
         if u[i] == cur_symb:
-            dp[i][i] = True
-            dp_suf[i][i] = True
-            dp_pref[i][i] = True
-            dp_in[i][i] = True
-    st.append([0, dp, dp_suf, dp_pref, dp_in])
+            front_stack_mem.is_substring[i][i] = True
+            front_stack_mem.is_suff[i][i] = True
+            front_stack_mem.is_pref[i][i] = True
+            front_stack_mem.is_inside[i][i] = True
+    front_stack_mem.has_empty_string = 0
+    stack.append(front_stack_mem)
 
 
-def closure(st, u):
-    arg = st[-1]
-    cnt = len(u) + 10
+def closure(stack, u):
+    arg = stack[-1]
+    cnt = len(u) + 1
     while cnt > 0:
         cnt -= 1
         for i in range(len(u)):
             for j in range(i, len(u)):
                 for k in range(i, j):
-                    if arg[1][i][k] and arg[1][k + 1][j]:
-                        arg[1][i][j] = True
-                    if arg[1][i][k] and arg[3][k + 1][j]:
-                        arg[3][i][j] = True
-                    if arg[2][i][k] and arg[1][k + 1][j]:
-                        arg[2][i][j] = True
-                    if arg[2][i][k] and arg[3][k + 1][j]:
-                        arg[4][i][j] = True
-    st.pop(-1)
-    arg[0] = True
-    st.append(arg)
+                    if arg.is_substring[i][k] and arg.is_substring[k + 1][j]:
+                        arg.is_substring[i][j] = True
+                    if arg.is_substring[i][k] and arg.is_pref[k + 1][j]:
+                        arg.is_pref[i][j] = True
+                    if arg.is_suff[i][k] and arg.is_substring[k + 1][j]:
+                        arg.is_suff[i][j] = True
+                    if arg.is_suff[i][k] and arg.is_pref[k + 1][j]:
+                        arg.is_inside[i][j] = True
+    stack.pop(-1)
+    arg.has_empty_string = 0
+    stack.append(arg)
 
 
-def find_max_substring(s, u):
-    st = []
-    for cur_symb in s:
+def find_max_substring_size(regular_expression, word):
+    stack = []
+    for cur_symb in regular_expression:
         if cur_symb.isalpha():
-            add_one_symbol_re(st, u, cur_symb)
+            add_one_symbol_re(stack, word, cur_symb)
         if cur_symb == "1":
-            add_empty_string_re(st, u)
+            add_empty_string_re(stack, word)
         if cur_symb == "*" or cur_symb == "∗":
-            closure(st, u)
+            closure(stack, word)
         if cur_symb == "+":
-            unite(st, u)
+            unite(stack, word)
         if cur_symb == ".":
-            concatenate(st, u)
-    if len(st) > 1:
+            concatenate(stack, word)
+    if len(stack) > 1:
         raise Exception("IncorrectRegularExpression")
-    table = st[0][4]
+    table = stack[0].is_inside
     max_size = 0
-    if u == "1":
+    if word == "1":
         return 0
-    for i in range(len(u)):
-        for j in range(len(u)):
+    for i in range(len(word)):
+        for j in range(len(word)):
             if j - i + 1 > max_size and table[i, j]:
                 max_size = j - i + 1
     return max_size
 
 
 def main():
-    s, u = input().split()
-    print(find_max_substring(s, u))
+    regular_expression, word = read_input()
+    print(find_max_substring_size(regular_expression, word))
 
 
 if __name__ == "__main__":
